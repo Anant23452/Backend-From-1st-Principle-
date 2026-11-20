@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Mastery Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F9F8F5;--surface:#fff;--border:rgba(0,0,0,0.08);
+  --text:#1A1917;--t2:#6B6965;--t3:#9C9990;--t4:#C5C3BC;
+  --r:12px;--r-sm:8px;
+  --c1:#7F77DD;--c1l:#EEEDFE;--c1d:#534AB7;
+  --c2:#378ADD;--c2l:#E6F1FB;--c2d:#185FA5;
+  --c3:#639922;--c3l:#EAF3DE;--c3d:#3B6D11;
+  --c4:#BA7517;--c4l:#FAEEDA;--c4d:#854F0B;
+  --c5:#D85A30;--c5l:#FAECE7;--c5d:#993C1D;
+  --c6:#D4537E;--c6l:#FBEAF0;--c6d:#993556;
+}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:1.5rem 2.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.hdr-logo{width:40px;height:40px;background:var(--c2l);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--c2d)}
+.hdr-title{font-size:17px;font-weight:600}
+.hdr-sub{font-size:12px;color:var(--t2);margin-top:1px}
+.hdr-date{font-size:12px;color:var(--t3)}
+
+/* ── LAYOUT ── */
+.main{max-width:960px;margin:0 auto;padding:2rem 1.5rem 5rem}
+
+/* ── CONFIGURATOR ── */
+.config{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:1.75rem 2rem;margin-bottom:1.25rem}
+.config-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.config-title{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--t2)}
+.quick-btns{display:flex;gap:6px}
+.qbtn{font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--t2);cursor:pointer;transition:all .15s}
+.qbtn:hover,.qbtn.active{background:var(--c2l);border-color:var(--c2);color:var(--c2d)}
+.slider-area{display:flex;align-items:center;gap:16px;margin-bottom:1.75rem}
+.slider-label{font-size:14px;color:var(--t2);min-width:120px}
+.range-wrap{flex:1;position:relative}
+input[type=range]{width:100%;height:6px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,var(--c2) var(--pct,50%),#E0DFD8 var(--pct,50%));border-radius:3px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--c2);cursor:pointer;box-shadow:0 1px 4px rgba(55,138,221,.35)}
+.range-ticks{display:flex;justify-content:space-between;padding:4px 0 0;font-size:10px;color:var(--t4)}
+.slider-val-big{font-size:28px;font-weight:600;color:var(--c2);min-width:90px;text-align:right;line-height:1}
+.slider-val-sub{font-size:11px;color:var(--t3);text-align:right;margin-top:2px}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--bg);border-radius:var(--r-sm);padding:1rem 1.1rem;border:1px solid var(--border)}
+.stat-val{font-size:22px;font-weight:600;line-height:1;margin-bottom:5px;transition:all .3s}
+.stat-lbl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.stat-note{font-size:11px;color:var(--t2);margin-top:4px}
+
+/* ── MOTIVATION ── */
+.motive{background:var(--c2l);border:1px solid rgba(55,138,221,.2);border-radius:var(--r);padding:1.25rem 1.75rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:16px}
+.motive-icon{font-size:28px}
+.motive-text .big{font-size:15px;font-weight:500;color:var(--c2d);line-height:1.5}
+.motive-text .small{font-size:13px;color:#185FA5;margin-top:3px}
+
+/* ── GANTT ── */
+.gantt-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:1.5rem 1.75rem;margin-bottom:1.25rem}
+.section-title{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--t2);margin-bottom:1.25rem}
+.gantt-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.gantt-lbl{font-size:12px;color:var(--t2);width:165px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gantt-track{flex:1;height:20px;background:#F1EFE8;border-radius:4px;overflow:hidden;position:relative}
+.gantt-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;transition:width .4s ease}
+.gantt-days{font-size:11px;color:var(--t3);min-width:52px;text-align:right}
+
+/* ── PHASE DIVIDER ── */
+.phase-div{display:flex;align-items:center;gap:10px;padding:1.25rem 0 .75rem}
+.phase-div-line{flex:1;height:1px;background:var(--border)}
+.phase-div-text{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);white-space:nowrap;padding:0 4px}
+
+/* ── PROJECT CARDS ── */
+.proj{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);margin-bottom:8px;overflow:hidden;transition:box-shadow .15s,border-color .15s}
+.proj:hover{box-shadow:0 2px 12px rgba(0,0,0,.05);border-color:rgba(0,0,0,.12)}
+.proj-bar{height:3px;transition:width .4s}
+.proj-head{display:flex;align-items:center;padding:1rem 1.25rem;gap:12px;cursor:pointer;user-select:none}
+.proj-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0}
+.proj-mid{flex:1;min-width:0}
+.proj-name{font-size:14px;font-weight:500;margin-bottom:2px}
+.proj-sub-text{font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-end{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.proj-days-big{font-size:18px;font-weight:600;line-height:1;transition:all .3s}
+.proj-days-unit{font-size:11px;color:var(--t3)}
+.proj-date-range{font-size:11px;color:var(--t3)}
+.level-pill{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500}
+.proj-lpa{font-size:10px;color:var(--t3);margin-top:1px}
+.proj-chevron{font-size:14px;color:var(--t4);transition:transform .2s;margin-left:4px}
+.proj-chevron.open{transform:rotate(180deg)}
+.proj-body{display:none;padding:0 1.25rem 1rem}
+.proj-body.open{display:block}
+.body-section{margin-bottom:.9rem}
+.body-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:.45rem}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--border);color:var(--t2)}
+.features{display:flex;flex-direction:column;gap:5px}
+.feat{display:flex;gap:8px;font-size:13px;color:var(--text);line-height:1.5;align-items:flex-start}
+.feat-dot{width:5px;height:5px;border-radius:50%;background:var(--c2);flex-shrink:0;margin-top:6px}
+.proj-divider{height:1px;background:var(--border);margin-bottom:.9rem}
+.time-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem}
+.tb-card{background:var(--bg);border-radius:var(--r-sm);padding:.65rem .85rem;border:1px solid var(--border)}
+.tb-val{font-size:15px;font-weight:600;margin-bottom:2px;transition:all .3s}
+.tb-lbl{font-size:11px;color:var(--t3)}
+
+/* ── DAILY TIPS ── */
+.tips-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem}
+.tip-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:1rem 1.1rem}
+.tip-icon-wrap{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.6rem;font-size:16px}
+.tip-t{font-size:13px;font-weight:500;margin-bottom:.3rem}
+.tip-d{font-size:12px;color:var(--t2);line-height:1.6}
+
+/* ── DAILY SCHEDULE ── */
+.schedule-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:1.5rem 1.75rem;margin-bottom:1.25rem}
+.schedule-rows{display:flex;flex-direction:column;gap:8px;margin-top:1rem}
+.sched-row{display:flex;align-items:center;gap:12px}
+.sched-time{font-size:12px;color:var(--t3);min-width:100px}
+.sched-bar-wrap{flex:1;height:28px;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.sched-bar{height:100%;display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:500;white-space:nowrap}
+.sched-label{font-size:12px;color:var(--t2);min-width:130px}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding:2rem;font-size:12px;color:var(--t4)}
+.footer span{color:var(--c2)}
+
+/* ── PRINT ── */
+@media print{
+  .hdr{position:static}
+  .config,.gantt-card,.schedule-card{page-break-inside:avoid}
+  .proj-body{display:block!important}
+}
+@media (max-width:640px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .tips-grid{grid-template-columns:1fr}
+  .time-breakdown{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">⌘</div>
+    <div>
+      <div class="hdr-title">Backend Mastery Planner</div>
+      <div class="hdr-sub">12 projects · foundations → MERN capstone</div>
+    </div>
+  </div>
+  <div class="hdr-date" id="today-str"></div>
+</header>
+
+<main class="main">
+
+  <!-- CONFIGURATOR -->
+  <div class="config">
+    <div class="config-top">
+      <div class="config-title">How many hours can you study per day?</div>
+      <div class="quick-btns">
+        <button class="qbtn" onclick="setHours(1)">1h</button>
+        <button class="qbtn" onclick="setHours(2)">2h</button>
+        <button class="qbtn active" onclick="setHours(3)">3h</button>
+        <button class="qbtn" onclick="setHours(4)">4h</button>
+        <button class="qbtn" onclick="setHours(6)">6h</button>
+        <button class="qbtn" onclick="setHours(8)">8h</button>
+      </div>
+    </div>
+    <div class="slider-area">
+      <div class="slider-label">Daily study hours</div>
+      <div class="range-wrap">
+        <input type="range" id="hrs-slider" min="1" max="12" value="3" step="0.5" oninput="onSlider(this)">
+        <div class="range-ticks">
+          <span>1h</span><span>2h</span><span>3h</span><span>4h</span><span>5h</span>
+          <span>6h</span><span>7h</span><span>8h</span><span>9h</span><span>10h</span>
+          <span>11h</span><span>12h</span>
+        </div>
+      </div>
+      <div>
+        <div class="slider-val-big" id="hrs-val">3h</div>
+        <div class="slider-val-sub" id="hrs-week">21h/week</div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-val" id="st-hours">265h</div>
+        <div class="stat-lbl">Total Hours</div>
+        <div class="stat-note">across 12 projects</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="st-days">—</div>
+        <div class="stat-lbl">Total Days</div>
+        <div class="stat-note" id="st-weeks">— weeks</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="st-finish">—</div>
+        <div class="stat-lbl">Finish Date</div>
+        <div class="stat-note" id="st-from-now">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--c3)">12</div>
+        <div class="stat-lbl">Projects</div>
+        <div class="stat-note">trainee → 14–28 LPA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOTIVATION -->
+  <div class="motive" id="motive-bar">
+    <div class="motive-icon">🎯</div>
+    <div class="motive-text">
+      <div class="big" id="motive-big">Loading...</div>
+      <div class="small" id="motive-small">Keep going — every hour compounds.</div>
+    </div>
+  </div>
+
+  <!-- GANTT -->
+  <div class="gantt-card">
+    <div class="section-title">Visual timeline — all 12 projects</div>
+    <div id="gantt-container"></div>
+    <div style="display:flex;gap:16px;margin-top:1rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><div style="width:12px;height:12px;border-radius:3px;background:var(--c1)"></div>Beginner</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><div style="width:12px;height:12px;border-radius:3px;background:var(--c2)"></div>Beginner+</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><div style="width:12px;height:12px;border-radius:3px;background:var(--c3)"></div>Intermediate</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><div style="width:12px;height:12px;border-radius:3px;background:var(--c4)"></div>Advanced</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><div style="width:12px;height:12px;border-radius:3px;background:var(--c5)"></div>Production</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><div style="width:12px;height:12px;border-radius:3px;background:var(--c6)"></div>Master</div>
+    </div>
+  </div>
+
+  <!-- DAILY SCHEDULE -->
+  <div class="schedule-card">
+    <div class="section-title">Ideal daily session structure</div>
+    <div id="schedule-rows" class="schedule-rows"></div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="tips-grid">
+    <div class="tip-card">
+      <div class="tip-icon-wrap" style="background:var(--c1l)">⚡</div>
+      <div class="tip-t">First 30 mins — review</div>
+      <div class="tip-d">Before coding, re-read yesterday's code and your notes. The brain consolidates while you sleep — this activates it.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon-wrap" style="background:var(--c3l)">🔨</div>
+      <div class="tip-t">Middle block — build</div>
+      <div class="tip-d">This is your deep work. No YouTube, no docs rabbit holes. Write code. Break it. Fix it. The struggle is the lesson.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon-wrap" style="background:var(--c4l)">📝</div>
+      <div class="tip-t">Last 15 mins — notes</div>
+      <div class="tip-d">Write 3 things you learned today in plain English. If you can't explain it simply, you don't know it yet.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon-wrap" style="background:var(--c2l)">🧪</div>
+      <div class="tip-t">Test every route</div>
+      <div class="tip-d">Don't trust an endpoint until Postman or Thunder Client proves it. Backend bugs hide in the requests you didn't try.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon-wrap" style="background:var(--c5l)">🚫</div>
+      <div class="tip-t">No tutorial hell</div>
+      <div class="tip-d">Watch a concept once, then close the video and rebuild it from scratch. Watching is not learning. Typing is.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon-wrap" style="background:var(--c6l)">📤</div>
+      <div class="tip-t">Push to GitHub daily</div>
+      <div class="tip-d">Even 5 lines. A green streak is a habit tracker. Interviewers look at commit history — make it consistent.</div>
+    </div>
+  </div>
+
+  <!-- PROJECT CARDS -->
+  <div id="projects-container"></div>
+
+</main>
+
+<div class="footer">Built for <span>Anant</span> · Backend Mastery Journey · Update your hours any time to replan</div>
+
+<script>
+const PROJECTS = [
+  {
+    n:1, name:"Hello Server",
+    sub:"Your first server — no framework, just raw Node",
+    hours:6, level:"Beginner", phase:1, lpa:"2.5 – 5 LPA",
+    c:"var(--c1)",cl:"var(--c1l)",cd:"var(--c1d)",
+    topics:["Node.js core modules","fs Module","http Module","npm & package.json"],
+    features:["Read and serve a static HTML homepage using fs.readFile","Handle different routes manually with the http module","Set correct Content-Type headers for HTML responses","Log every incoming request to the console"],
+    why:"Before Express hides the details, build a server by hand. You'll actually understand what Express is doing for you once you use it."
+  },
+  {
+    n:2, name:"Static Portfolio Site",
+    sub:"Express basics — routing, middleware, static files",
+    hours:8, level:"Beginner", phase:1, lpa:"2.5 – 5 LPA",
+    c:"var(--c1)",cl:"var(--c1l)",cd:"var(--c1d)",
+    topics:["Express Basics","express.static","Middleware","dotenv"],
+    features:["Serve your own HTML/CSS/JS portfolio via express.static","Custom 404 page for unknown routes","Logging middleware that records every request on /contact","Environment variables loaded via dotenv"],
+    why:"Your first real Express app. Middleware finally clicks once you write your own logger and watch it run before every request."
+  },
+  {
+    n:3, name:"In-Memory To-Do API",
+    sub:"Full REST CRUD — GET, POST, PUT, DELETE",
+    hours:10, level:"Beginner+", phase:1, lpa:"2.5 – 5 LPA",
+    c:"var(--c2)",cl:"var(--c2l)",cd:"var(--c2d)",
+    topics:["REST Routes","req / res","CRUD Operations","Nodemon"],
+    features:["GET/POST/PUT/DELETE routes for todos stored in an array","Test every route with Postman or Thunder Client","Auto-restart your server on file changes with nodemon","Return proper JSON responses and status codes"],
+    why:"This is the shape every backend API takes. Once CRUD feels boring here, real databases will feel easy."
+  },
+  {
+    n:4, name:"Notes App API",
+    sub:"Your first real database — MongoDB + Mongoose",
+    hours:15, level:"Beginner+", phase:2, lpa:"5 – 9 LPA",
+    c:"var(--c2)",cl:"var(--c2l)",cd:"var(--c2d)",
+    topics:["MongoDB Fundamentals","Mongoose Schemas","MVC Structure","RESTful Design"],
+    features:["Full CRUD notes API backed by MongoDB Atlas","Mongoose schemas and models for notes","Proper MVC folder structure — routes / controllers / models","Correct HTTP status codes for every response"],
+    why:"First time your data survives a server restart. Mongoose schemas make sense once you see invalid data get rejected automatically."
+  },
+  {
+    n:5, name:"Auth Starter Kit",
+    sub:"Signup, login, JWT — the auth flow you'll reuse forever",
+    hours:15, level:"Intermediate", phase:2, lpa:"5 – 9 LPA",
+    c:"var(--c3)",cl:"var(--c3l)",cd:"var(--c3d)",
+    topics:["bcrypt Hashing","JWT Auth","Auth Middleware","Protected Routes"],
+    features:["Signup and login routes with hashed passwords via bcrypt","Issue and verify JWTs on login","Protected /profile route that only works with a valid token","Auth guard middleware reusable across routes"],
+    why:"Every real app needs this. Build it once carefully here, and you'll copy this pattern into every project after."
+  },
+  {
+    n:6, name:"Mini E-commerce API",
+    sub:"Search, filter, pagination, ownership checks",
+    hours:18, level:"Intermediate", phase:2, lpa:"5 – 9 LPA",
+    c:"var(--c3)",cl:"var(--c3l)",cd:"var(--c3d)",
+    topics:["Pagination","Input Validation","Ownership Checks","Query Filtering"],
+    features:["Products with categories, search, and filter","Pagination on the product listing endpoint","Users can only edit their own listings — ownership enforced","Input validation with express-validator or Joi"],
+    why:"This is where APIs start feeling production-shaped — validating input and checking who's allowed to touch what."
+  },
+  {
+    n:7, name:"Real-Time Chat Backend",
+    sub:"Socket.io + Redis pub/sub — scales across instances",
+    hours:25, level:"Advanced", phase:3, lpa:"9 – 16 LPA",
+    c:"var(--c4)",cl:"var(--c4l)",cd:"var(--c4d)",
+    topics:["Socket.io","Redis Pub/Sub","Horizontal Scaling","MongoDB Persistence"],
+    features:["Socket.io server for real-time messaging","Redis pub/sub so messages sync across multiple server instances","Messages persisted to MongoDB","Rooms or channels for separate conversations"],
+    why:"Real-time is a different mental model — events instead of request/response. Redis pub/sub is how real chat apps scale past one server."
+  },
+  {
+    n:8, name:"Payments API",
+    sub:"Stripe/Razorpay integration, webhooks, rate limiting",
+    hours:25, level:"Advanced", phase:3, lpa:"9 – 16 LPA",
+    c:"var(--c4)",cl:"var(--c4l)",cd:"var(--c4d)",
+    topics:["Payment Gateway Integration","Webhooks","Rate Limiting","Security Headers"],
+    features:["Integrate Razorpay or Stripe for checkout","Handle payment webhooks correctly and idempotently","Store transaction history in MongoDB","Rate-limit and secure payment routes with helmet + cors"],
+    why:"Handling money means handling failure modes correctly. Webhooks teach you why idempotency matters."
+  },
+  {
+    n:9, name:"Job Queue Service",
+    sub:"Background jobs with BullMQ — retries, status tracking",
+    hours:28, level:"Production", phase:3, lpa:"9 – 16 LPA",
+    c:"var(--c5)",cl:"var(--c5l)",cd:"var(--c5d)",
+    topics:["BullMQ","Background Jobs","Jest + Supertest","Docker & Deployment"],
+    features:["Background job processing with BullMQ + Redis","Retry logic for failed jobs","Status endpoint to check job progress","Dockerized, deployed to Render/Railway, documented with Swagger"],
+    why:"Not everything can happen inside a request. This is how real systems handle slow work like emails or report generation."
+  },
+  {
+    n:10, name:"Capstone: Full MERN Marketplace",
+    sub:"Everything combined — deployed live on a custom domain",
+    hours:45, level:"Master", phase:4, lpa:"14 – 28 LPA",
+    c:"var(--c6)",cl:"var(--c6l)",cd:"var(--c6d)",
+    topics:["React + REST APIs","Redux Toolkit / Context","End-to-End Auth","System Design Basics"],
+    features:["Connect React frontend to your own APIs with Axios/React Query","Global state with Redux Toolkit or Context","Auth flow from frontend forms to backend JWT","Combine DB, Redis caching, Socket.io, and payments in one app","Deployed full stack — Vercel + Render + Atlas"],
+    why:"This is the project you put on your resume. 'Here's my live app' beats any tutorial certificate in an interview."
+  },
+  {
+    n:11, name:"Optional: SaaS Dashboard",
+    sub:"Recurring billing, role-based access, admin panel",
+    hours:35, level:"Master", phase:4, lpa:"14 – 28 LPA",
+    c:"var(--c6)",cl:"var(--c6l)",cd:"var(--c6d)",
+    topics:["Recurring Billing","Role-Based Access Control","Admin Dashboards"],
+    features:["Subscription billing with a payment provider","Role-based access — admin vs regular user permissions","Admin dashboard for managing users and plans"],
+    why:"SaaS billing logic shows up in real jobs constantly. Optional, but a strong resume differentiator."
+  },
+  {
+    n:12, name:"Optional: Real-Time Collab Tool",
+    sub:"A mini Notion/Trello — live for every connected user",
+    hours:35, level:"Master", phase:4, lpa:"14 – 28 LPA",
+    c:"var(--c6)",cl:"var(--c6l)",cd:"var(--c6d)",
+    topics:["WebSockets","Real-Time Sync","System Design"],
+    features:["Shared documents or boards that update live for every user","Conflict handling when two users edit at once","Presence indicators — who's online right now"],
+    why:"Optional, but real-time collaborative apps are a great way to prove you understand system design under concurrency."
+  }
+];
+
+let hoursPerDay = 3;
+
+const PHASE_LABELS = ["","Foundations","APIs & Persistence","Scale & Security","MERN Capstone"];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function fmt(d){return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+
+function calc(){
+  const today = new Date();
+  let cursor = new Date(today);
+  const totalHours = PROJECTS.reduce((s,p)=>s+p.hours,0);
+  const totalDays = Math.ceil(totalHours / hoursPerDay);
+  const finishDate = addDays(today, totalDays);
+  const diffMs = finishDate - today;
+  const diffWeeks = Math.ceil(diffMs/604800000);
+  const diffMonths = (finishDate.getFullYear()-today.getFullYear())*12 + (finishDate.getMonth()-today.getMonth());
+
+  const schedule = PROJECTS.map(p => {
+    const days = Math.ceil(p.hours / hoursPerDay);
+    const start = new Date(cursor);
+    const end = addDays(cursor, days);
+    cursor = new Date(end);
+    return { ...p, days, start, end };
+  });
+
+  return { totalHours, totalDays, finishDate, diffWeeks, diffMonths, schedule };
+}
+
+function updateSliderGradient(val){
+  const pct = ((val - 1) / (12 - 1)) * 100;
+  document.getElementById('hrs-slider').style.setProperty('--pct', pct + '%');
+  document.getElementById('hrs-slider').style.background = `linear-gradient(to right, var(--c2) ${pct}%, #E0DFD8 ${pct}%)`;
+}
+
+function renderAll(){
+  const {totalHours,totalDays,finishDate,diffWeeks,diffMonths,schedule} = calc();
+
+  // stats
+  document.getElementById('st-hours').textContent = totalHours + 'h';
+  document.getElementById('st-days').textContent = totalDays;
+  document.getElementById('st-weeks').textContent = diffWeeks + ' weeks';
+  document.getElementById('st-finish').textContent = MONTHS[finishDate.getMonth()] + ' ' + finishDate.getFullYear();
+  document.getElementById('st-from-now').textContent = diffMonths <= 1 ? 'in ~' + diffWeeks + ' weeks' : 'in ~' + diffMonths + ' months';
+
+  // motivation
+  let msg, sub;
+  if(hoursPerDay >= 8){
+    msg = `At ${hoursPerDay}h/day, you'll be job-ready in ${diffWeeks} weeks — full-time pace. 🔥`;
+    sub = "That's serious commitment. Build every day, push to GitHub, and you'll have 12 projects to show by " + fmt(finishDate) + ".";
+  } else if(hoursPerDay >= 5){
+    msg = `At ${hoursPerDay}h/day, backend mastery by ${fmt(finishDate)} — ${diffMonths <= 1 ? diffWeeks + ' weeks' : diffMonths + ' months'} from today.`;
+    sub = "Strong pace. You'll finish all 12 projects with time to polish each one. Consistency is everything.";
+  } else if(hoursPerDay >= 3){
+    msg = `At ${hoursPerDay}h/day, you'll be placement-ready by ${fmt(finishDate)}.`;
+    sub = "Realistic and sustainable. The best pace is one you can maintain every day — not bursts followed by breaks.";
+  } else {
+    msg = `At ${hoursPerDay}h/day, it'll take about ${diffMonths} months — and that's completely fine.`;
+    sub = "Slow is smooth, smooth is fast. Understand every concept deeply before moving on. No shortcuts.";
+  }
+  document.getElementById('motive-big').textContent = msg;
+  document.getElementById('motive-small').textContent = sub;
+
+  // gantt
+  const gantt = document.getElementById('gantt-container');
+  gantt.innerHTML = '';
+  schedule.forEach(p => {
+    const pct = Math.max(3, (p.days / totalDays) * 100).toFixed(1);
+    const row = document.createElement('div');
+    row.className = 'gantt-row';
+    row.innerHTML = `
+      <div class="gantt-lbl" title="${p.name}">P${p.n} ${p.name}</div>
+      <div class="gantt-track">
+        <div class="gantt-bar" style="width:${pct}%;background:${p.c};color:white">
+          ${p.days > 2 ? p.days + 'd' : ''}
+        </div>
+      </div>
+      <div class="gantt-days">${p.days}d</div>`;
+    gantt.appendChild(row);
+  });
+
+  // daily schedule
+  renderSchedule();
+
+  // projects
+  const pc = document.getElementById('projects-container');
+  pc.innerHTML = '';
+  let lastPhase = 0;
+  schedule.forEach(p => {
+    if(p.phase !== lastPhase){
+      const div = document.createElement('div');
+      div.className = 'phase-div';
+      div.innerHTML = `<div class="phase-div-line"></div><div class="phase-div-text">Phase ${p.phase} — ${PHASE_LABELS[p.phase]}</div><div class="phase-div-line"></div>`;
+      pc.appendChild(div);
+      lastPhase = p.phase;
+    }
+    const card = document.createElement('div');
+    card.className = 'proj';
+    const lvlColors = {
+      'Beginner':'background:var(--c1l);color:var(--c1d)',
+      'Beginner+':'background:var(--c2l);color:var(--c2d)',
+      'Intermediate':'background:var(--c3l);color:var(--c3d)',
+      'Advanced':'background:var(--c4l);color:var(--c4d)',
+      'Production':'background:var(--c5l);color:var(--c5d)',
+      'Master':'background:var(--c6l);color:var(--c6d)',
+    };
+    card.innerHTML = `
+      <div class="proj-bar" style="background:${p.c};width:${Math.min(100,(p.hours/70)*100)}%"></div>
+      <div class="proj-head" onclick="toggleProj(this)">
+        <div class="proj-circle" style="background:${p.cl};color:${p.cd}">${p.n.toString().padStart(2,'0')}</div>
+        <div class="proj-mid">
+          <div class="proj-name">${p.name}</div>
+          <div class="proj-sub-text">${p.sub}</div>
+        </div>
+        <div class="proj-end">
+          <div style="display:flex;align-items:baseline;gap:4px">
+            <div class="proj-days-big" style="color:${p.c}">${p.days}</div>
+            <div class="proj-days-unit">days</div>
+          </div>
+          <div class="proj-date-range">${fmt(p.start)} → ${fmt(p.end)}</div>
+          <div class="level-pill" style="${lvlColors[p.level]||''}">${p.level}</div>
+          <div class="proj-lpa">${p.lpa}</div>
+        </div>
+        <div class="proj-chevron">▾</div>
+      </div>
+      <div class="proj-body">
+        <div class="proj-divider"></div>
+        <div class="time-breakdown">
+          <div class="tb-card"><div class="tb-val" style="color:${p.c}">${p.hours}h</div><div class="tb-lbl">Total Hours</div></div>
+          <div class="tb-card"><div class="tb-val">${p.days} days</div><div class="tb-lbl">At ${hoursPerDay}h/day</div></div>
+          <div class="tb-card"><div class="tb-val" style="font-size:13px">${fmt(p.start)}</div><div class="tb-lbl">Start Date</div></div>
+          <div class="tb-card"><div class="tb-val" style="font-size:13px;color:${p.c}">${p.lpa}</div><div class="tb-lbl">Target LPA</div></div>
+        </div>
+        <div class="body-section" style="margin-top:.9rem">
+          <div class="body-label">Topics you'll learn</div>
+          <div class="chips">${p.topics.map(t=>`<span class="chip">${t}</span>`).join('')}</div>
+        </div>
+        <div class="body-section">
+          <div class="body-label">What you build</div>
+          <div class="features">${p.features.map(f=>`<div class="feat"><div class="feat-dot"></div>${f}</div>`).join('')}</div>
+        </div>
+        <div style="background:${p.cl};border-radius:8px;padding:.75rem 1rem;font-size:13px;color:${p.cd};line-height:1.7;margin-top:.5rem;font-style:italic">
+          ${p.why}
+        </div>
+      </div>`;
+    pc.appendChild(card);
+  });
+}
+
+function renderSchedule(){
+  const h = hoursPerDay;
+  let rows = [];
+  if(h <= 2){
+    rows = [
+      {t:"First 20 min",l:"Review yesterday's code + notes",w:20/h/60*100,c:"var(--c1l)",tc:"var(--c1d)"},
+      {t:"Remaining",l:"Build the current feature",w:80,c:"var(--c3l)",tc:"var(--c3d)"}
+    ];
+  } else if(h <= 4){
+    rows = [
+      {t:"0:00 – 0:30",l:"Review yesterday + plan today's feature",w:30/h/60*100,c:"var(--c1l)",tc:"var(--c1d)"},
+      {t:"0:30 – " + fmt2(h*60-30),l:"Build — write, break, debug, fix",w:70,c:"var(--c3l)",tc:"var(--c3d)"},
+      {t:"Last 15 min",l:"Write what you learned in your notes",w:15/h/60*100,c:"var(--c4l)",tc:"var(--c4d)"}
+    ];
+  } else if(h <= 6){
+    rows = [
+      {t:"0:00 – 0:30",l:"Review + warm up",w:30/h/60*100,c:"var(--c1l)",tc:"var(--c1d)"},
+      {t:"0:30 – 3:00",l:"Deep work — build feature 1",w:150/h/60*100,c:"var(--c3l)",tc:"var(--c3d)"},
+      {t:"3:00 – 3:15",l:"Break (walk, no screens)",w:15/h/60*100,c:"var(--bg)",tc:"var(--t3)"},
+      {t:"3:15 – 5:30",l:"Deep work — build feature 2 or debug",w:135/h/60*100,c:"var(--c2l)",tc:"var(--c2d)"},
+      {t:"Last 15 min",l:"Notes + GitHub commit",w:15/h/60*100,c:"var(--c4l)",tc:"var(--c4d)"}
+    ];
+  } else {
+    rows = [
+      {t:"0:00 – 0:30",l:"Review previous day",w:30/h/60*100,c:"var(--c1l)",tc:"var(--c1d)"},
+      {t:"0:30 – 3:00",l:"Session 1 — build core feature",w:150/h/60*100,c:"var(--c3l)",tc:"var(--c3d)"},
+      {t:"3:00 – 3:30",l:"Break (essential at this intensity)",w:30/h/60*100,c:"var(--bg)",tc:"var(--t3)"},
+      {t:"3:30 – 6:00",l:"Session 2 — testing, edge cases, bugs",w:150/h/60*100,c:"var(--c2l)",tc:"var(--c2d)"},
+      {t:"6:00 – 6:30",l:"Break",w:30/h/60*100,c:"var(--bg)",tc:"var(--t3)"},
+      {t:"6:30 – End",l:"Session 3 — docs, refactor, next feature prep",w:Math.max(5,(h*60-420)/h/60*100),c:"var(--c4l)",tc:"var(--c4d)"},
+      {t:"Last 15 min",l:"Notes + commit + plan tomorrow",w:15/h/60*100,c:"var(--c5l)",tc:"var(--c5d)"}
+    ];
+  }
+  const container = document.getElementById('schedule-rows');
+  container.innerHTML = rows.map(r => `
+    <div class="sched-row">
+      <div class="sched-time">${r.t}</div>
+      <div class="sched-bar-wrap">
+        <div class="sched-bar" style="width:${Math.min(100,Math.max(8,r.w))}%;background:${r.c};color:${r.tc}">${r.l}</div>
+      </div>
+    </div>`).join('');
+}
+
+function fmt2(mins){const h=Math.floor(mins/60);const m=mins%60;return `${h}:${m.toString().padStart(2,'0')}`}
+
+function onSlider(el){
+  hoursPerDay = parseFloat(el.value);
+  updateSliderGradient(hoursPerDay);
+  document.getElementById('hrs-val').textContent = hoursPerDay + 'h';
+  document.getElementById('hrs-week').textContent = Math.round(hoursPerDay * 7) + 'h/week';
+  document.querySelectorAll('.qbtn').forEach(b => b.classList.remove('active'));
+  renderAll();
+}
+
+function setHours(h){
+  hoursPerDay = h;
+  const slider = document.getElementById('hrs-slider');
+  slider.value = h;
+  updateSliderGradient(h);
+  document.getElementById('hrs-val').textContent = h + 'h';
+  document.getElementById('hrs-week').textContent = Math.round(h * 7) + 'h/week';
+  document.querySelectorAll('.qbtn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.textContent) === h);
+  });
+  renderAll();
+}
+
+function toggleProj(el){
+  const body = el.nextElementSibling;
+  const chev = el.querySelector('.proj-chevron');
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.proj-body.open').forEach(x => x.classList.remove('open'));
+  document.querySelectorAll('.proj-chevron.open').forEach(x => x.classList.remove('open'));
+  if(!isOpen){ body.classList.add('open'); chev.classList.add('open'); }
+}
+
+// init
+const now = new Date();
+document.getElementById('today-str').textContent = `Today: ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+updateSliderGradient(3);
+renderAll();
+</script>
+</body>
+</html>
