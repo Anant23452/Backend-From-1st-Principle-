@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Backend Scaling Part 2 - Learning Lab</title>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--ink:#1e293b;--mut:#64748b;--acc:#4f46e5;--ok:#059669;--bad:#dc2626;--bd:#e2e8f0;--soft:#eef2ff}
+@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#1e293b;--ink:#e2e8f0;--mut:#94a3b8;--acc:#818cf8;--bd:#334155;--soft:#27304a}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+nav{width:250px;padding:14px;border-right:1px solid var(--bd);position:sticky;top:0;height:100vh;overflow:auto;flex:none}
+nav h2{font-size:15px;margin:0 0 8px}nav button{display:block;width:100%;text-align:left;margin:2px 0;padding:7px 9px;border:0;border-radius:8px;background:none;color:var(--ink);cursor:pointer;font:inherit;font-size:13px}
+nav button.on,nav button:hover{background:var(--soft);color:var(--acc)}main{flex:1;padding:20px;max-width:900px}
+section{display:none}section.on{display:block}h1{margin:0 0 4px;font-size:22px}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin:12px 0}
+.badge{display:inline-block;font-size:11px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:99px}.mut{color:var(--mut);font-size:13px}
+button.b,select,input[type=text]{padding:7px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+button.b.p{background:var(--acc);color:#fff;border-color:var(--acc)}.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.srv{display:inline-block;min-width:92px;margin:4px;padding:8px;border-radius:10px;border:2px solid var(--acc);background:var(--soft);text-align:center;transition:.3s}
+.srv.down{border-color:var(--bad);opacity:.5}.srv small{display:block;color:var(--mut)}.bar{height:8px;background:var(--acc);border-radius:4px;transition:width .3s}
+#log{font:12px/1.5 ui-monospace,monospace;background:#0f172a;color:#e2e8f0;border-radius:8px;padding:8px;height:130px;overflow:auto;margin-top:8px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}a{color:var(--acc)}.q{margin:10px 0}.opt{display:block;width:100%;text-align:left;margin:4px 0;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;font:inherit}
+.opt.right{border-color:var(--ok);background:#d1fae5;color:#064e3b}.opt.wrong{border-color:var(--bad);background:#fee2e2;color:#7f1d1d}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--acc);margin:0 2px;animation:pop .5s}@keyframes pop{from{transform:scale(2);opacity:0}}
+@media(max-width:700px){body{display:block}nav{width:auto;height:auto;position:static;display:flex;flex-wrap:wrap;gap:4px}nav h2{width:100%}nav button{width:auto}}
+</style></head><body>
+<nav><h2>Backend Scaling P2</h2><div id="nav"></div></nav>
+<main>
+<section id="home" class="on"><h1>Backend Scaling & Performance - Part 2 Lab</h1>
+<p class="mut">Video: 21.2 by Sriniously. <a href="https://youtu.be/sOhAopEwjH4" target="_blank">Open on YouTube</a></p>
+<div class="card"><span class="badge">Honesty note</span><p>Everything in this lab is a <b>browser simulation</b> - no real servers, databases or networks. Latency numbers are illustrative. YouTube blocked direct access, so the transcript was not read; chapter timestamps are from the video description, and teacher points came from a third-party AI summary and may be imperfect.</p></div>
+<div class="card"><b>Chapter index (click a timestamp)</b><div id="chap"></div></div>
+<div class="card"><b>Suggested order:</b> Stateless -> Load balancer -> Replicas -> Queue. Then try the Debug Challenges, Glossary and Quiz.</div></section>
+
+<section id="stateless"><h1>Statelessness</h1><p class="mut">Teacher: sessions belong in a shared store, not in one instance's memory (ch. 0:43).</p>
+<div class="card"><div class="row"><label>Session storage: <select id="st_mode"><option value="mem">In-memory on each server (stateful)</option><option value="redis">Shared Redis (stateless)</option></select></label>
+<button class="b p" onclick="stLogin()">1. Login</button><button class="b" onclick="stReq()">2. Make request</button><button class="b" onclick="stReset()">Reset</button></div>
+<div id="st_servers"></div><div id="st_out" class="mut"></div></div></section>
+
+<section id="lb"><h1>Load Balancer</h1><p class="mut">Teacher: round robin, weighted RR, least connections, health checks (ch. 9:11).</p>
+<div class="card"><div class="row"><label>Algorithm <select id="lb_alg"><option value="rr">Round robin</option><option value="w">Weighted RR (A=3,B=2,C=1)</option><option value="lc">Least connections</option></select></label>
+<label>Request cost <select id="lb_cost"><option value="same">All equal</option><option value="mixed">Mixed (some very slow)</option></select></label>
+<button class="b p" onclick="lbSend(1)">Send 1</button><button class="b" onclick="lbSend(12)">Send 12</button><button class="b" onclick="lbReset()">Reset</button></div>
+<div class="row"><label><input type="checkbox" id="hc" checked> Health checks enabled</label><span class="mut">Click a server to kill/revive it (simulated crash).</span></div>
+<div id="lb_servers"></div><div id="lb_out" class="mut"></div></div></section>
+
+<section id="db"><h1>Read Replicas & Replication Lag</h1><p class="mut">Teacher: replicas serve reads; a read right after a write may be stale (ch. 27:47).</p>
+<div class="card"><div class="row"><label>Replication lag: <input type="range" id="lag" min="100" max="3000" value="1500"> <b id="lagv">1500</b> ms</label>
+<label><input type="checkbox" id="ryw"> Read-your-writes (read primary for 3s after write)</label></div>
+<div class="row"><input type="text" id="bio" value="New bio"><button class="b p" onclick="dbWrite()">Write bio</button><button class="b" onclick="dbRead()">Read profile</button><button class="b" onclick="dbReset()">Reset</button></div>
+<div class="row"><div class="srv" id="p_n">Primary<small id="p_v">bio: "Old bio"</small></div><div class="srv" id="r_n">Replica<small id="r_v">bio: "Old bio"</small></div></div>
+<div id="db_out" class="mut"></div></div></section>
+
+<section id="cdn"><h1>CDN Cache</h1><p class="mut">Teacher: edge nodes cut distance; purge when content changes (CDN chapter).</p>
+<div class="card"><div class="row"><label>Edge TTL <select id="ttl"><option value="5">5 s</option><option value="30">30 s</option></select></label>
+<button class="b p" onclick="cdnReq()">User (Mumbai) requests /app.js</button><button class="b" onclick="cdnPurge()">Purge cache</button><button class="b" onclick="cdnDeploy()">Deploy new version at origin</button><button class="b" onclick="cdnReset()">Reset</button></div>
+<div class="row"><div class="srv">Origin<small id="c_o">v1</small></div><div class="srv">Edge cache<small id="c_e">empty</small></div></div><div id="cdn_out" class="mut"></div></div></section>
+
+<section id="q"><h1>Async Queue</h1><p class="mut">Teacher: producer -> queue -> workers; don't block users on slow work (ch. 1:13:25).</p>
+<div class="card"><div class="row"><label>Mode <select id="qm"><option value="sync">Synchronous (wait for email)</option><option value="async">Async (queue the email)</option></select></label>
+<label>Workers <select id="qw"><option>1</option><option>2</option><option>3</option></select></label>
+<label><input type="checkbox" id="qf"> Email provider is down</label>
+<button class="b p" onclick="qSend()">POST /invite</button><button class="b" onclick="qReset()">Reset</button></div>
+<div>Queue: <span id="qdots"></span> <span class="mut" id="qlen"></span></div><div id="q_out" class="mut"></div></div></section>
+
+<section id="sl"><h1>Serverless Cold Starts</h1><p class="mut">Teacher: pay per execution, but cold starts add latency (ch. 1:44:09).</p>
+<div class="card"><div class="row"><label>Idle timeout <select id="idle"><option value="5">5 s</option><option value="15">15 s</option></select></label>
+<button class="b p" onclick="slCall()">Invoke function</button><button class="b" onclick="slWait(6)">Wait 6s</button><button class="b" onclick="slWait(20)">Wait 20s</button><button class="b" onclick="slReset()">Reset</button></div>
+<div class="srv" id="sl_i">Function instance<small id="sl_s">none (cold)</small></div><div id="sl_out" class="mut"></div></div></section>
+
+<section id="dbg"><h1>Debug Challenges</h1><div id="dbgbox"></div></section>
+<section id="gl"><h1>Glossary</h1><input type="text" id="gs" placeholder="Search terms..." oninput="glr()" style="width:100%"><div id="gl_list"></div></section>
+<section id="quiz"><h1>Quiz</h1><div id="qz"></div></section>
+<div class="card" style="margin-top:20px"><div id="log"></div></div>
+</main>
+<script>
+const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const log=(m,c)=>{const l=$('log');l.innerHTML+=`<div class="${c||''}">${m}</div>`;l.scrollTop=1e9};
+const CH=[["Introduction & Recap",0,"0:00"],["Statelessness",43,"0:43"],["Load Balancers & Algorithms",551,"9:11"],["Database Scaling",1667,"27:47"],["CDNs",3082,"51:22"],["Edge Computing",3903,"1:05:03"],["Async Processing",4405,"1:13:25"],["Microservices vs Monolith",5443,"1:30:43"],["Serverless",6249,"1:44:09"],["Key Takeaways",7847,"2:10:47"]];
+$('chap').innerHTML=CH.map(c=>`<div><a target="_blank" href="https://youtu.be/sOhAopEwjH4?t=${c[1]}">${c[2]}</a> - ${c[0]}</div>`).join('');
+const TABS=[["home","Home"],["stateless","Statelessness"],["lb","Load Balancer"],["db","Read Replicas"],["cdn","CDN"],["q","Async Queue"],["sl","Serverless"],["dbg","Debug Challenges"],["gl","Glossary"],["quiz","Quiz"]];
+$('nav').innerHTML=TABS.map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join('');
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==b.dataset.t));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x==b))});
+// ---- Stateless
+let stSess=null,stN=0;const stMem={A:null,B:null};
+function stDraw(){$('st_servers').innerHTML=['A','B'].map(s=>`<div class="srv">Server ${s}<small>${$('st_mode').value=='mem'?'RAM: '+(stMem[s]||'empty'):'no local state'}</small></div>`).join('')+`<div class="srv">Redis<small>${$('st_mode').value=='redis'?(stSess||'empty'):'unused'}</small></div>`}
+function stLogin(){const s=['A','B'][stN++%2],m=$('st_mode').value;if(m=='mem')stMem[s]='sess-42';else stSess='sess-42';stDraw();$('st_out').innerHTML=`Login handled by Server ${s}. Session saved ${m=='mem'?'in its RAM':'in Redis'}.`;log(`login -> ${s}`)}
+function stReq(){const s=['A','B'][stN++%2],m=$('st_mode').value,ok=m=='mem'?!!stMem[s]:!!stSess;$('st_out').innerHTML=ok?`<span class="ok">Server ${s}: session found - request OK.</span>`:`<span class="bad">Server ${s}: no session - 401, user logged out!</span>`;log(`request -> ${s}: ${ok?'OK':'401'}`,ok?'ok':'bad')}
+function stReset(){stSess=null;stN=0;stMem.A=stMem.B=null;$('st_out').textContent='';stDraw()}$('st_mode').onchange=stReset;stDraw();
+// ---- LB
+const LS=[{n:'A',w:3,up:1,c:0,t:0},{n:'B',w:2,up:1,c:0,t:0},{n:'C',w:1,up:1,c:0,t:0}];let rr=0,wq=[],lbDetected=[1,1,1];
+function lbDraw(){const mx=Math.max(1,...LS.map(s=>s.t));$('lb_servers').innerHTML=LS.map((s,i)=>`<div class="srv ${s.up?'':'down'}" onclick="lbKill(${i})" style="cursor:pointer">Server ${s.n} ${s.up?'':'(DOWN)'}<small>total ${s.t} | active ${s.c}</small><div class="bar" style="width:${s.t/mx*100}%"></div></div>`).join('')}
+function lbKill(i){LS[i].up=!LS[i].up;log(`Server ${LS[i].n} ${LS[i].up?'recovered':'crashed'}`,LS[i].up?'ok':'bad');if($('hc').checked){lbDetected[i]=LS[i].up;log('health check '+(LS[i].up?'passed: back in rotation':'failed: removed from rotation'))}else lbDetected[i]=1;lbDraw()}
+function lbPick(){const pool=LS.filter((s,i)=>lbDetected[i]);if(!pool.length)return null;const a=$('lb_alg').value;
+if(a=='rr')return pool[rr++%pool.length];
+if(a=='w'){if(!wq.length)wq=pool.flatMap(s=>Array(s.w).fill(s));let s;do{s=wq.shift()}while(s&&!pool.includes(s)&&wq.length);return s||pool[0]}
+return pool.reduce((m,s)=>s.c<m.c?s:m,pool[0])}
+async function lbSend(n){for(let i=0;i<n;i++){const s=lbPick();if(!s){log('503: no healthy servers','bad');continue}
+if(!s.up){log(`Request sent to dead Server ${s.n} -> ERROR (no health check!)`,'bad');s.t++;lbDraw();continue}
+s.t++;s.c++;const slow=$('lb_cost').value=='mixed'&&Math.random()<.3;lbDraw();log(`req -> ${s.n}${slow?' (slow)':''}`);setTimeout(()=>{s.c--;lbDraw()},slow?2500:400);await sleep(120)}
+$('lb_out').textContent='Try Mixed cost with Round robin vs Least connections and compare "active".'}
+function lbReset(){LS.forEach(s=>{s.t=0;s.c=0;s.up=1});lbDetected=[1,1,1];rr=0;wq=[];lbDraw()}lbDraw();
+// ---- DB
+let P={bio:'Old bio'},R={bio:'Old bio'},lastW=0;
+$('lag').oninput=()=>$('lagv').textContent=$('lag').value;
+function dbDraw(){$('p_v').textContent=`bio: "${P.bio}"`;$('r_v').textContent=`bio: "${R.bio}"`}
+function dbWrite(){const v=$('bio').value,lag=+$('lag').value;P.bio=v;lastW=Date.now();dbDraw();log(`WRITE "${v}" -> primary; replicating (${lag} ms)`);setTimeout(()=>{R.bio=v;dbDraw();log('replica caught up','ok')},lag)}
+function dbRead(){const useP=$('ryw').checked&&Date.now()-lastW<3000,src=useP?P:R,stale=src.bio!==P.bio;
+$('db_out').innerHTML=`Read from <b>${useP?'primary':'replica'}</b>: "${src.bio}" ${stale?'<span class="bad">STALE!</span>':'<span class="ok">fresh</span>'}`;log(`READ ${useP?'primary':'replica'} -> ${src.bio}`,stale?'bad':'ok')}
+function dbReset(){P={bio:'Old bio'};R={bio:'Old bio'};lastW=0;dbDraw();$('db_out').textContent=''}
+// ---- CDN
+let origin=1,edge=null,edgeAt=0;
+function cdnDraw(){$('c_o').textContent='v'+origin;$('c_e').textContent=edge?`v${edge} (${Math.max(0,Math.round($('ttl').value-(Date.now()-edgeAt)/1000))}s left)`:'empty'}
+function cdnReq(){const ttl=+$('ttl').value*1000,hit=edge&&Date.now()-edgeAt<ttl;if(!hit){edge=origin;edgeAt=Date.now()}
+const ms=hit?3:180,stale=edge!==origin;$('cdn_out').innerHTML=`${hit?'<span class="ok">HIT</span> in ~3 ms':'<span class="bad">MISS</span> -> origin, ~180 ms (illustrative)'} - served v${edge} ${stale?'<span class="bad">(STALE - origin has v'+origin+')</span>':''}`;log(`CDN ${hit?'HIT':'MISS'} ${ms}ms`,hit?'ok':'bad');cdnDraw()}
+function cdnPurge(){edge=null;log('edge purged');cdnDraw()}function cdnDeploy(){origin++;log('origin now v'+origin);cdnDraw()}function cdnReset(){origin=1;edge=null;cdnDraw()}setInterval(cdnDraw,1000);cdnDraw();
+// ---- Queue
+let Q=0,busy=0,jobs=0;
+function qDraw(){$('qdots').innerHTML='<span class="dot"></span>'.repeat(Q);$('qlen').textContent=`${Q} waiting, ${busy} running`}
+async function qSend(){const t0=performance.now(),fail=$('qf').checked;
+if($('qm').value=='sync'){$('q_out').textContent='Waiting for email provider...';await sleep(400);if(fail){$('q_out').innerHTML='<span class="bad">500 after ~400 ms: email failed, whole invite request failed.</span>';log('sync: request failed','bad')}else{$('q_out').innerHTML=`<span class="ok">200 after ~${Math.round(performance.now()-t0)} ms (user waited for email).</span>`}return}
+Q++;qDraw();$('q_out').innerHTML=`<span class="ok">202 Accepted after ~${Math.round(performance.now()-t0)} ms</span> - email handled in background.`;qWork(fail)}
+async function qWork(fail){const W=+$('qw').value;if(busy>=W)return;busy++;Q--;qDraw();await sleep(900);let ok=!fail;
+if(!ok){log('worker: email failed - retry later (job kept in queue)','bad');Q++;busy--;qDraw();return}
+log('worker: email sent','ok');busy--;qDraw();if(Q>0)qWork(false)}
+function qReset(){Q=0;busy=0;qDraw();$('q_out').textContent=''}qDraw();
+// ---- Serverless
+let slLast=null;
+function slState(){return slLast!==null&&(Date.now()-slLast)/1000<+$('idle').value}
+function slCall(){const warm=slState();slLast=Date.now();$('sl_s').textContent='warm';$('sl_out').innerHTML=warm?'<span class="ok">Warm: ~20 ms</span>':'<span class="bad">COLD START: ~900 ms (illustrative) - new instance provisioned</span>';log('invoke '+(warm?'warm':'cold'),warm?'ok':'bad')}
+function slWait(s){if(slLast!==null)slLast-=s*1000;$('sl_s').textContent=slState()?'warm':'none (cold)';log(`waited ${s}s (simulated)`)}
+function slReset(){slLast=null;$('sl_s').textContent='none (cold)';$('sl_out').textContent=''}
+// ---- Debug
+const DBG=[["Users randomly get logged out after you scale from 1 to 3 servers. Likely cause?",["Sessions stored in each server's memory","Postgres is too slow","CORS misconfiguration"],0,"Per-instance memory sessions are invisible to other instances. Use Redis or signed tokens."],
+["After saving a profile, the page shows old data for 1-2 seconds.",["The browser cache is broken","Reading from a lagging replica","Port is wrong"],1,"Replication lag. Read from primary after a write, or wait/poll."],
+["One slow endpoint keeps overloading one server although traffic is 'evenly' split.",["Round robin ignores request cost; try least connections","Add more RAM to the client","Disable health checks"],0,"Round robin counts requests, not work."],
+["A crashed server keeps receiving traffic and users see errors.",["No working health check","Too many replicas","CDN TTL too long"],0,"Add a /health endpoint the balancer polls; remove failing nodes."]];
+$('dbgbox').innerHTML=DBG.map((d,i)=>`<div class="card q"><b>${i+1}. ${d[0]}</b>${d[1].map((o,j)=>`<button class="opt" onclick="dbgA(this,${i},${j})">${o}</button>`).join('')}<div class="mut" id="dx${i}"></div></div>`).join('');
+function dbgA(b,i,j){const c=DBG[i][2];b.classList.add(j==c?'right':'wrong');$('dx'+i).textContent=DBG[i][3]}
+// ---- Glossary
+const G=[["Horizontal scaling","Adding more machines of similar size."],["Vertical scaling","Giving one machine more CPU/RAM."],["Stateless","Server keeps no per-user data between requests."],["Load balancer","Component that spreads requests across servers."],["Round robin","Rotate through servers in order."],["Weighted round robin","Round robin where bigger servers get more requests."],["Least connections","Send to the server with fewest active connections."],["Health check","Periodic probe that removes failing servers from rotation."],["Read replica","Copy of the primary database used for reads."],["Replication lag","Delay before a write appears on replicas."],["Sharding","Splitting data across database instances by a key."],["CDN","Network of edge caches near users."],["Cache invalidation / purge","Removing or refreshing stale cached content."],["Edge computing","Running code on CDN edge nodes."],["Producer / consumer","Code that enqueues jobs / workers that process them."],["Message queue","Buffer holding jobs (e.g. Redis, RabbitMQ, BullMQ)."],["Monolith","Whole app deployed as one unit."],["Microservices","App split into independently deployed services."],["Serverless","Run functions on demand; provider manages servers."],["Cold start","Delay creating a new function instance."],["Autoscaling","Automatically adding/removing instances based on load."],["Observability","Logs, metrics and traces to understand a running system."]];
+function glr(){const q=$('gs').value.toLowerCase();$('gl_list').innerHTML=G.filter(g=>(g[0]+g[1]).toLowerCase().includes(q)).map(g=>`<div class="card"><b>${g[0]}</b><br>${g[1]}</div>`).join('')||'<p class="mut">No match.</p>'}glr();
+// ---- Quiz
+const QZ=[["Why must scaled-out servers be stateless?",["Any instance may serve any request","It is faster to write","Redis requires it"],0,"State on one instance breaks requests routed to others."],
+["Which algorithm best handles very uneven request durations?",["Round robin","Least connections","Random"],1,"Active connections approximate current load."],
+["What is replication lag?",["Slow CPU","Delay before replicas receive writes","Network outage"],1,"Replicas can briefly serve old data."],
+["A CDN is best for caching...",["Private user dashboards without headers","Static assets and public cacheable responses","Database transactions"],1,"Cache public, rarely-changing content."],
+["Why queue an invite email?",["It makes the email faster","So the user is not blocked and failures can be retried","Queues are required by Express"],1,"Decouples response time from slow side effects."],
+["Teacher's advice before adding caching/Kubernetes?",["Measure the bottleneck and prefer the simplest fix","Adopt microservices early","Skip observability"],0,"Measure first, keep it simple."],
+["A cold start is...",["A DB crash","Delay creating a new function instance","A CDN purge"],1,"Provisioning latency in serverless."]];
+let qi=0,qs=0;
+function qzR(){if(qi>=QZ.length){$('qz').innerHTML=`<div class="card"><h2>Score: ${qs}/${QZ.length}</h2><button class="b p" onclick="qi=0;qs=0;qzR()">Retry</button></div>`;return}
+const q=QZ[qi];$('qz').innerHTML=`<div class="card"><div class="mut">Question ${qi+1}/${QZ.length}</div><b>${q[0]}</b>${q[1].map((o,j)=>`<button class="opt" onclick="qzA(this,${j})">${o}</button>`).join('')}<div id="qx" class="mut"></div></div>`}
+function qzA(b,j){const q=QZ[qi];if(document.querySelector('.opt.right'))return;if(j==q[2]){qs++;b.classList.add('right')}else{b.classList.add('wrong');document.querySelectorAll('#qz .opt')[q[2]].classList.add('right')}
+$('qx').innerHTML=q[3]+'<br><button class="b p" onclick="qi++;qzR()">Next</button>'}qzR();
+document.querySelector('nav button').classList.add('on');
+</script></body></html>

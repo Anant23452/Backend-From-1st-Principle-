@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Lesson 16 | Error Handling & Fault Tolerance - Animated Lab</title>
+<style>
+:root{--bg:#081224;--surface:#101f35;--surface2:#172a42;--edge:#2b405c;--text:#eaf4ff;--muted:#a4bbd2;--a:#5ce3c7;--b:#74aaff;--red:#fb8291;--warn:#ffca7a;--violet:#c9a5ff;--radius:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{background:radial-gradient(900px 420px at 20% -5%,#173456 0,transparent 70%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif;margin:0}button,select,input{font:inherit}a{color:#8fc5ff}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(1.9rem,3.7vw,3rem);line-height:1.1;letter-spacing:-.04em;margin:15px 0}h2{letter-spacing:-.02em;font-size:1.45rem}h3{font-size:1.08rem}small,.small{font-size:.84rem;color:var(--muted)}.wrap{width:min(1180px,calc(100% - 32px));margin:auto}.top{padding:45px 0 23px}.eyebrow{letter-spacing:.18em;font-size:.77rem;color:var(--a);font-weight:800}.intro{max-width:850px;color:var(--muted);font-size:1.02rem}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.chip{background:#1d3351;color:#cde3fc;border:1px solid #385775;padding:5px 10px;border-radius:99px;font-size:.8rem}.tabs{position:sticky;top:0;z-index:40;display:flex;gap:6px;padding:9px 0;background:rgba(8,18,36,.95);backdrop-filter:blur(15px);overflow:auto;border-bottom:1px solid var(--edge)}.tab{color:#b6cbe2;border:1px solid transparent;background:transparent;padding:11px 17px;border-radius:12px;white-space:nowrap;cursor:pointer;font-weight:750}.tab.active{color:#061a26;background:var(--a)}.panel{display:none;animation:fadeIn .22s ease;min-height:500px;padding-top:25px;padding-bottom:44px}.panel.active{display:block}@keyframes fadeIn{from{opacity:.3;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}.card{border:1px solid var(--edge);background:var(--surface);padding:20px;border-radius:var(--radius);margin-bottom:16px;box-shadow:0 18px 42px #0002}.subcard{background:var(--surface2);border:1px solid var(--edge);border-radius:14px;padding:14px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.muted{color:var(--muted)}.good{color:var(--a)}.bad{color:var(--red)}.warning{color:var(--warn)}.purple{color:var(--violet)}.controlbar{display:flex;flex-wrap:wrap;gap:10px;align-items:end}.field{display:flex;flex-direction:column;gap:6px;min-width:165px;flex:1}.field label{font-size:.8rem;color:var(--muted);font-weight:750}select,input[type="number"],input[type="range"]{width:100%;border:1px solid #426080;background:#0b1b2e;color:#eff9ff;border-radius:10px;padding:10px 12px}input[type="range"]{padding:6px}.btn{cursor:pointer;border:1px solid #526c88;border-radius:10px;background:#1c3653;color:#eff9ff;padding:10px 16px;font-weight:750;transition:transform .15s,border-color .15s}.btn:hover:not(:disabled){transform:translateY(-2px);border-color:#70baf9}.btn.primary{background:var(--a);color:#072236;border-color:var(--a)}.btn.warn{border-color:#9e6269;color:#ffd3da;background:#512c3b}.btn:disabled{opacity:.45;cursor:not-allowed}.statline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.stat{display:inline-block;border:1px solid #3d5570;background:#152d49;border-radius:9px;font-size:.8rem;font-weight:750;padding:4px 9px;color:#bfd8f6}.flow{display:flex;align-items:stretch;gap:7px;overflow-x:auto;padding:18px 0 24px}.node{position:relative;min-width:118px;text-align:center;border:2px solid #45617e;background:#142a42;border-radius:13px;padding:17px 8px;color:#cce2f7;font-size:.89rem;transition:.26s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}.node small{font-size:.7rem}.node.active{border-color:var(--a);background:#16483e;box-shadow:0 0 0 5px #43ddb91c,0 0 36px #38d5ae44;transform:translateY(-4px)}.node.past{border-color:#4a95ce;background:#123553}.node.failed{border-color:var(--red);background:#4f2638;box-shadow:0 0 0 5px #fa7b8b22}.arr{display:flex;align-items:center;color:#74aaff;font-size:24px;flex:none}.log{background:#071525;border:1px solid #294a68;color:#cfe2f4;padding:14px;font:12px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;min-height:150px;max-height:290px;overflow:auto;border-radius:12px;white-space:pre-wrap}.callout{background:#123b3b;border-left:4px solid var(--a);padding:13px 15px;border-radius:8px;margin:14px 0}.callout.warn{background:#453721;border-color:var(--warn)}.callout.fail{background:#442631;border-color:var(--red)}.code{margin:0;background:#06111f;border:1px solid #2b4768;padding:17px;border-radius:12px;overflow:auto;color:#cbe9fb;white-space:pre;font:12px/1.65 Consolas,monospace}.case-card{cursor:pointer;transition:.16s;min-height:152px;text-align:left}.case-card:hover,.case-card.active{border-color:var(--a);transform:translateY(-2px)}.case-icon{font-size:26px;margin-bottom:8px}.scenario{background:#091b30;border-radius:15px;border:1px solid #355574;padding:20px;min-height:165px}.diagramrow{display:flex;justify-content:space-around;align-items:center;gap:14px;flex-wrap:wrap;margin:18px 0}.mini-node{min-width:160px;max-width:230px;text-align:center;background:#143653;border:2px solid #347aac;padding:16px;border-radius:15px}.mini-node.error{background:#532738;border-color:#ea788b}.mini-node.success{background:#123e39;border-color:#4bd9b6}.arrow{font-size:26px;color:var(--b)}.timeline{display:flex;gap:9px;overflow:auto;margin:19px 0;padding:10px 0}.attempt{min-width:132px;border:1px solid #516c89;padding:14px 10px;border-radius:12px;text-align:center;background:#15263d}.attempt.bad{border-color:var(--red);background:#43283a}.attempt.wait{border-color:var(--warn);background:#473725}.attempt.ok{border-color:var(--a);background:#13433d}.attempt.adding{animation:slideIn .28s ease}@keyframes slideIn{from{opacity:.1;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}.switch{display:flex;align-items:center;gap:9px;padding:12px 13px;background:var(--surface2);border:1px solid var(--edge);border-radius:12px;margin-bottom:9px;cursor:pointer}.switch input{accent-color:var(--a);width:18px;height:18px}.tag{display:inline-block;border-radius:9px;background:#223c5b;color:#ddefff;padding:4px 8px;font-size:.78rem}.status-pill{padding:7px 13px;border-radius:100px;font-weight:850;background:#245044;color:#afffe9}.status-pill.err{background:#5c313b;color:#ffd6d8}.status-pill.warn{background:#584522;color:#ffe2a2}.chap{display:flex;gap:14px;align-items:start;border:1px solid var(--edge);border-radius:13px;padding:13px;margin:8px 0;background:var(--surface2)}.chap a{min-width:74px;font-weight:800}.q{margin:13px 0;padding:15px;border:1px solid var(--edge);background:var(--surface2);border-radius:12px}.q button{display:block;text-align:left;width:100%;margin:7px 0;background:#10283e;border:1px solid #334d67;color:var(--text);border-radius:8px;padding:9px 11px;cursor:pointer}.q button.correct{border-color:var(--a);background:#164737}.q button.wrong{border-color:var(--red);background:#4b2938}.q button:disabled{cursor:default}.footer{text-align:center;color:#94a9bc;border-top:1px solid #284059;padding:18px 0 30px;margin-top:15px;font-size:.86rem}svg{max-width:100%}table{border-collapse:collapse;width:100%;font-size:.9rem}td,th{padding:10px;border-bottom:1px solid #365069;text-align:left;vertical-align:top}th{color:var(--a)}.poster{display:grid;grid-template-columns:1fr auto;align-items:center;gap:30px}.poster strong{color:var(--a)}.shadow-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:#8faecb;font-weight:750}.section-lead{max-width:860px;color:var(--muted)}.progress{height:8px;border-radius:6px;background:#223956;overflow:hidden}.progress>div{height:100%;background:var(--a);transition:width .35s}.pulse{animation:pulse 1s ease infinite alternate}@keyframes pulse{from{box-shadow:0 0 0 2px #34d6b322}to{box-shadow:0 0 0 10px #34d6b322}}@media(max-width:780px){.grid2,.grid3{grid-template-columns:1fr}.flow{gap:5px}.node{min-width:112px}.poster{grid-template-columns:1fr}.tabs{margin:0 -5px}.tab{padding:10px 12px}.card{padding:15px}}
+</style>
+</head>
+<body>
+<div class="wrap"><header class="top">
+<div class="eyebrow">BACKEND FROM FIRST PRINCIPLES · LESSON 16</div>
+<h1>Error Handling &amp;<br><span class="good">Fault-Tolerant Systems</span></h1>
+<p class="intro">Learn how real backend systems survive failures. Animate requests, trigger database errors, experiment with retries, test readiness, and practice secure global error handling. The teacher's concepts are preserved; these simulations are additional learning exercises.</p>
+<div class="meta"><span class="chip">🕒 Original video: 1:09:25</span><span class="chip">🧩 6 interactive learning modules</span><span class="chip">💻 Works offline, no backend needed</span><span class="chip">🔐 Safe simulated data only</span><a class="chip" href="https://youtu.be/8NaM_9aKS24" target="_blank" rel="noopener">▶ Original lesson ↗</a></div>
+</header>
+<nav class="tabs" role="tablist" aria-label="Learning labs">
+<button class="tab active" data-page="flow" role="tab" aria-selected="true">01 Request Simulator</button>
+<button class="tab" data-page="faults" role="tab" aria-selected="false">02 Failure Atlas</button>
+<button class="tab" data-page="retries" role="tab" aria-selected="false">03 Retry Lab</button>
+<button class="tab" data-page="health" role="tab" aria-selected="false">04 Health &amp; Monitoring</button>
+<button class="tab" data-page="chapters" role="tab" aria-selected="false">05 Full Lesson Notes</button>
+<button class="tab" data-page="quiz" role="tab" aria-selected="false">06 Recall Quiz</button>
+</nav>
+<main>
+<section id="flow" class="panel active" role="tabpanel">
+<h2>01 · Watch a request succeed or fail</h2><p class="section-lead">Pick a failure. Each click on <b>Next step</b> advances the request through middleware, controller, service, repository, database, and global handler. Notice that once a response is sent, execution stops.</p>
+<div class="card"><div class="controlbar">
+<div class="field" style="max-width:370px"><label for="flowCase">Failure to inject</label><select id="flowCase"><option value="ok">201 — Create a book successfully</option><option value="bad">400 — Book name too long</option><option value="auth">401 — Missing token</option><option value="notfound">404 — Book not found</option><option value="duplicate">409 — Duplicate book name</option><option value="pool">503 — Database unavailable</option><option value="unknown">500 — Unexpected exception</option></select></div>
+<button class="btn primary" id="runFlow">Start request</button><button class="btn" id="nextFlow" disabled>Next step →</button><button class="btn" id="autoFlow" disabled>▶ Auto play</button><button class="btn" id="resetFlow">↺ Reset</button></div>
+<div class="flow" id="flowNodes" aria-live="polite"></div><div class="progress"><div id="flowProgress" style="width:0%"></div></div><p class="muted" id="stepExplainer" style="margin-top:15px">Select a scenario and start the request.</p>
+<div class="grid2"><div><div class="shadow-label">Execution log</div><pre class="log" id="flowLog">[idle] A new request has not started yet.</pre></div><div><div class="shadow-label">HTTP response to React</div><pre class="log" id="flowResponse">Waiting for request...</pre></div></div></div>
+<div class="callout"><b>Remember:</b> A 500 is not the universal answer to all exceptions. Categorize expected business failures and hide sensitive details for unexpected errors. The global error handler is the final safety net.</div>
+<div class="card"><h3>Extra coding explanation: Express global handler</h3><pre class="code">class AppError extends Error {
+  constructor(status, code, message) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
+
+// AFTER your routes:
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const known = err instanceof AppError;
+  const status = known ? err.status : 500;
+  console.error({ requestId: req.id, status }); // safe metadata
+  res.status(status).json({
+    error: {
+      code: known ? err.code : 'INTERNAL_ERROR',
+      message: known ? err.message : 'Something went wrong',
+      requestId: req.id ?? null
+    }
+  });
+});</pre><p class="small">Additional instructor-inspired code. In Express 5, rejected async route promises are forwarded automatically; in older versions use explicit next(err)/async wrapper.</p></div>
+</section>
+<section id="faults" class="panel" role="tabpanel">
+<h2>02 · Five categories of backend errors</h2><p class="section-lead">These are the five error families introduced by the teacher. Select one to reveal a relatable analogy, the original lesson examples, Newbert examples, detection, and handling.</p>
+<div id="faultCards" class="grid3"></div>
+<div class="card" id="faultDetail" aria-live="polite"></div>
+<div class="grid2">
+<div class="card"><h3>Database deadlock: circular waiting</h3><div class="diagramrow"><div class="mini-node">Transaction A<br><span class="small">holds Row 1</span></div><div class="arrow">⇆</div><div class="mini-node error">Transaction B<br><span class="small">holds Row 2</span></div></div><p>A wants Row 2 and B wants Row 1. Neither can proceed, so PostgreSQL detects the deadlock and aborts a transaction. Your application needs to catch the error and decide whether a transaction retry is safe.</p><span class="tag">SQLSTATE 40P01</span></div>
+<div class="card"><h3>Logic error: invisible damage</h3><div class="diagramrow"><div class="mini-node">Order total ₹500</div><div class="arrow">→</div><div class="mini-node error">Discount applied twice</div></div><p>HTTP 200 does <b>not</b> prove the business outcome is correct. A logic error can lose money without crashing. Test business invariants and monitor real outcomes.</p><span class="tag">Silently incorrect output</span></div>
+</div>
+</section>
+<section id="retries" class="panel" role="tabpanel">
+<h2>03 · Experiment with exponential backoff</h2><p class="section-lead">Simulate a failing external email API. Move one attempt at a time and watch the delay increase. Compare temporary failures (retryable) against bad input (not retryable).</p>
+<div class="card"><div class="controlbar">
+<div class="field"><label for="retryErr">Provider response</label><select id="retryErr"><option value="429">429 — Too many requests</option><option value="503">503 — Service unavailable</option><option value="400">400 — Bad request</option><option value="401">401 — Invalid token</option></select></div>
+<div class="field"><label for="failN">Fail first <span id="failLabel">2</span> attempts</label><input type="range" id="failN" min="0" max="5" step="1" value="2"/></div>
+<div class="field"><label for="baseDelay">Base delay</label><select id="baseDelay"><option value="1000">1 second</option><option value="2000">2 seconds</option><option value="500">0.5 second</option></select></div>
+<button class="btn primary" id="retryNext">Send attempt</button><button class="btn" id="retryReset">↺ Reset</button></div>
+<label class="switch" style="max-width:330px;margin:14px 0"><input id="useJitter" type="checkbox" checked><span>Add simulated random jitter</span></label>
+<div class="timeline" id="attemptTimeline"><div class="attempt">No attempts yet</div></div>
+<div class="statline"><span class="stat" id="retryState">Ready</span><span class="stat" id="retryClock">Simulated elapsed: 0 s</span><span class="stat">Maximum: 5 attempts</span></div><div class="callout" id="retryAdvice">The backoff is a simulation; no network calls or real delays occur.</div></div>
+<div class="grid2"><div class="card"><h3>Why not retry forever?</h3><p>Repeated calls can overload a failing service and worsen an outage. Limit attempts, use timeouts, honor <code>Retry-After</code> when present, and consider a circuit breaker.</p></div><div class="card"><h3>Why do idempotency keys matter?</h3><p>If a provider completed an operation but its HTTP response was lost, retrying might execute it twice. A stable idempotency key helps the provider deduplicate supported operations.</p></div></div>
+</section>
+<section id="health" class="panel" role="tabpanel">
+<h2>04 · Liveness, readiness and business monitoring</h2><p class="section-lead">Toggle system conditions. Watch the checks update immediately and observe why a server can be alive but not ready or serving incorrect business results.</p>
+<div class="grid2"><div class="card"><h3>Simulated infrastructure</h3>
+<label class="switch"><input type="checkbox" id="proc" checked> Node.js process responds</label>
+<label class="switch"><input type="checkbox" id="db" checked> PostgreSQL is reachable</label>
+<label class="switch"><input type="checkbox" id="config" checked> Required config is loaded</label>
+<label class="switch"><input type="checkbox" id="external" checked> Email provider is reachable</label>
+<label class="switch"><input type="checkbox" id="biz" checked> Internship application success rate normal</label>
+<p class="small">The email provider is optional for the main read API in this example. Your readiness policy depends on which operations are critical.</p></div>
+<div class="card"><h3>Probe results</h3><div class="statline" style="margin-bottom:16px"><span id="liveStatus" class="status-pill">/live → 200</span><span id="readyStatus" class="status-pill">/ready → 204</span><span id="businessStatus" class="status-pill">Business: normal</span></div>
+<div class="diagramrow"><div class="mini-node" id="serviceNode">Express API</div><div class="arrow">⇄</div><div class="mini-node" id="dbNode">PostgreSQL</div></div><div id="healthExplain" class="callout">Both probes pass; business activity is healthy.</div></div></div>
+<div class="card"><h3>Observe more than HTTP errors</h3><div class="grid3"><div class="subcard"><div class="shadow-label">Technical</div><h3>p95 latency</h3><p id="latency" class="good">120 ms</p></div><div class="subcard"><div class="shadow-label">Application</div><h3>5xx rate</h3><p id="errors" class="good">0.1%</p></div><div class="subcard"><div class="shadow-label">Business</div><h3>Completed applications</h3><p id="bizmetric" class="good">98% of baseline</p></div></div><p class="small" style="margin-top:14px">These values are illustrative, not actual Newbert telemetry.</p></div>
+<div class="card"><h3>Try a safety test</h3><p>Switch the business metric off while all technical dependencies remain on. The server is alive and ready, and may still return HTTP 200 — yet the product is malfunctioning. That is why the teacher emphasizes business metrics.</p></div>
+</section>
+<section id="chapters" class="panel" role="tabpanel">
+<h2>05 · Teacher-aligned lesson outline (every major section)</h2><p class="section-lead">The source video is a whiteboard mindset lesson with no live code. These instructor-aligned chapters come from timestamped transcript-derived notes. All code/implementation cautions in this lab are added material.</p>
+<div class="card" id="chapterList"></div>
+<div class="card"><h3>Teacher vs additional engineering detail</h3><table><thead><tr><th>Teacher's example</th><th>Additional practical clarification</th></tr></thead><tbody>
+<tr><td>Duplicate book → 400</td><td>409 Conflict is also appropriate for a duplicate resource, depending on API contract.</td></tr>
+<tr><td>Foreign key author missing → 404</td><td>400, 404, or 422 may fit; decide from request semantics and expose consistent behavior.</td></tr>
+<tr><td>No rows treated as a DB error</td><td>node-postgres SELECT returns <code>rows: []</code>; your application must detect an absent resource.</td></tr>
+<tr><td>429 → backoff</td><td>Respect Retry-After, add jitter, cap attempts, and check idempotency.</td></tr>
+<tr><td>Regular /health check</td><td>Use lightweight liveness separately from readiness and deeper synthetic probes.</td></tr>
+</tbody></table></div>
+<div class="card"><h3>Local implementation challenge</h3><p>Create an Express <code>POST /api/books</code> route, a PostgreSQL UNIQUE index on <code>books.name</code>, and a final error middleware. Independently test validation (400), duplicate (409), not found (404), unexpected error (500), database outage (503 or a safely handled 500). Add request IDs; do not log secrets.</p><pre class="code">CREATE TABLE books (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  description TEXT DEFAULT ''
+);
+
+-- node-postgres unique-violation SQLSTATE: 23505
+-- PostgreSQL deadlock SQLSTATE: 40P01
+-- Foreign-key violation SQLSTATE: 23503</pre></div>
+</section>
+<section id="quiz" class="panel" role="tabpanel">
+<h2>06 · Test whether you truly understand</h2><p class="section-lead">Select an answer to each question; you will get immediate feedback. The goal is to explain <em>why</em>, not memorize an error-code table.</p>
+<div class="statline" style="margin-bottom:14px"><span class="stat" id="score">Answered 0 / 10 · Correct 0</span><button class="btn" id="resetQuiz">↺ Try again</button></div><div id="quizList"></div>
+<div class="callout" id="quizFinal">Challenge: explain how you would make Newbert handle a temporary GitHub API outage without crashing or leaking credentials.</div>
+</section>
+</main><footer class="footer">Companion to Sriniously Lesson 16 · Original concept sequence from transcript-derived notes · Independent illustrations, interactive simulations and code additions · Not connected to a real database or API</footer>
+</div>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);const safe=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Tab navigation.
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('.tab').forEach(t=>{t.classList.toggle('active',t===b);t.setAttribute('aria-selected',String(t===b));});
+ document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===b.dataset.page));
+}));
+// Request simulator: exact step sequences are deliberate conceptual abstractions.
+const stages=['React','Middleware','Router','Controller','Service','Repository','PostgreSQL','Global handler','Response'];
+const specs={
+ ok:{code:201,title:'Book created',steps:[0,1,2,3,4,5,6,8],texts:['React sends POST /api/books','Auth + JSON parser allow request','Router finds POST /api/books','Controller checks name, description','Service executes createBook()','Repository runs parameterized INSERT','PostgreSQL stores record, returns row','201 Created sent to React'],response:{data:{id:42,name:'Backend Engineering'}}},
+ bad:{code:400,title:'Invalid book name',steps:[0,1,2,3,7,8],texts:['React sends an overly long book name','Auth + JSON parse succeed','Router matches the request','Controller detects name > 500 chars and throws AppError','Global handler classifies validation error','Return safe field message'],response:{error:{code:'INVALID_NAME',message:'Book name must be 1-500 characters'}}},
+ auth:{code:401,title:'Unauthenticated',steps:[0,1,7,8],texts:['React sends protected request','Auth middleware detects missing or invalid token','Global handler maps authentication error','Return 401 without running controller'],response:{error:{code:'UNAUTHORIZED',message:'Authentication required'}}},
+ notfound:{code:404,title:'Book not found',steps:[0,1,2,3,4,5,6,7,8],texts:['React asks for GET /api/books/404','Middleware processes request','Router finds GET /api/books/:id','Controller validates book ID','Service asks repository for book','Repository SELECTs by ID','PostgreSQL returns zero rows','Application raises a domain NotFound error','Global handler returns 404'],response:{error:{code:'BOOK_NOT_FOUND',message:'Book does not exist'}}},
+ duplicate:{code:409,title:'Duplicate book',steps:[0,1,2,3,4,5,6,7,8],texts:['React posts book title already taken','Middleware accepts request','Route matches POST','Controller validates syntax','Service requests creation','Repository INSERT attempts a duplicate','PostgreSQL returns SQLSTATE 23505','Repository maps to AppError(409)','Global middleware returns safe 409'],response:{error:{code:'BOOK_EXISTS',message:'Book already exists'}}},
+ pool:{code:503,title:'Database unavailable',steps:[0,1,2,3,4,5,6,7,8],texts:['React requests a new book','Middleware passes request','Router matches route','Controller validates payload','Service calls repository','Repository tries PostgreSQL','Connection fails / pool cannot acquire connection','Error is classified without exposing credentials','Return 503 Service Unavailable'],response:{error:{code:'SERVICE_UNAVAILABLE',message:'Temporarily unavailable. Please retry later.'}}},
+ unknown:{code:500,title:'Unexpected backend error',steps:[0,1,2,3,4,7,8],texts:['React submits valid request','Middleware works','Router matches','Controller passes validation','Unexpected bug occurs in business logic','Global handler records safe request metadata, classifies unknown','Return generic 500; no stack trace leaked'],response:{error:{code:'INTERNAL_ERROR',message:'Something went wrong'}}}
+};
+let sim=null,timer=null;
+function drawStages(){const row=$('flowNodes');row.innerHTML=stages.map((s,i)=>`<div class="node" data-stage="${i}"><b>${safe(s)}</b><small>${i===7?'error-only':(i===8?'final':'' )}</small></div>${i<stages.length-1?'<div class="arr">→</div>':''}`).join('');}
+function simReset(){if(timer){clearInterval(timer);timer=null;}$('autoFlow').textContent='▶ Auto play';sim=null;drawStages();$('flowProgress').style.width='0%';$('stepExplainer').textContent='Select a scenario and start the request.';$('flowLog').textContent='[idle] A new request has not started yet.';$('flowResponse').textContent='Waiting for request...';$('nextFlow').disabled=true;$('autoFlow').disabled=true;}
+function start(){simReset();const key=$('flowCase').value;sim={key,spec:specs[key],pos:-1,history:[]};$('nextFlow').disabled=false;$('autoFlow').disabled=false;doStep();}
+function doStep(){if(!sim)return;const s=sim.spec;if(sim.pos>=s.steps.length-1)return;sim.pos++;let stage=s.steps[sim.pos];let last=sim.pos===s.steps.length-1;let isFailure=stage===7;document.querySelectorAll('#flowNodes .node').forEach(n=>{n.className='node';let j=Number(n.dataset.stage);if(j===stage)n.classList.add(isFailure?'failed':'active');else if(s.steps.slice(0,sim.pos).includes(j))n.classList.add('past');});
+let msg=s.texts[sim.pos];sim.history.push(`[step ${sim.pos+1}] ${stages[stage]}: ${msg}`);$('flowLog').textContent=sim.history.join('\n');$('flowLog').scrollTop=$('flowLog').scrollHeight;$('stepExplainer').innerHTML=`<b>Current stage:</b> ${safe(stages[stage])} · ${safe(msg)}`;$('flowProgress').style.width=((sim.pos+1)/s.steps.length*100)+'%';
+if(last){$('flowResponse').textContent=`HTTP ${s.code} — ${s.title}\n`+JSON.stringify(s.response,null,2);$('nextFlow').disabled=true;stopAuto();$('autoFlow').disabled=true;}else $('flowResponse').textContent='Pending: no HTTP response sent yet.';
+}
+function stopAuto(){if(timer){clearInterval(timer);timer=null;}$('autoFlow').textContent='▶ Auto play';}
+$('runFlow').addEventListener('click',start);$('nextFlow').addEventListener('click',doStep);$('resetFlow').addEventListener('click',simReset);$('flowCase').addEventListener('change',simReset);$('autoFlow').addEventListener('click',()=>{if(timer){stopAuto();return;}if(!sim)return;$('autoFlow').textContent='⏸ Pause';timer=setInterval(()=>{if(!sim||sim.pos>=sim.spec.steps.length-1){stopAuto();return;}doStep();},820);});drawStages();
+// Failure atlas.
+const faults=[
+{icon:'🧠',name:'Logic errors',time:'02:00',lesson:'The code runs, but the output is wrong. The teacher gives an online store applying the same discount twice, creating negative shipping costs.',analogy:'A calculator displays an answer without crashing, but the formula is wrong.',newbert:'An application eligibility rule incorrectly rejects valid final-year students.',detect:'Unit tests for business rules; monitor completed applications and data invariants.',handle:'Repair rules, fix existing data, add regression tests; do not blindly retry.'},
+{icon:'🗄️',name:'Database errors',time:'05:24',lesson:'Connection errors, pool exhaustion, UNIQUE and FOREIGN KEY violations, malformed/slow SQL, and deadlocks.',analogy:'Your filing cabinet is locked, a folder is missing, or two people block each other.',newbert:'Two signups race for the same email, triggering a unique constraint.',detect:'Query/connection metrics, SQLSTATE, slow-query monitors.',handle:'Translate expected constraints; rollback deadlocks; retry only safe transactions; protect integrity.'},
+{icon:'🌐',name:'External service errors',time:'10:51',lesson:'Network/DNS/timeout, expired credentials, provider 429 rate limits, and outages. Retries use exponential backoff.',analogy:'Your delivery service is unavailable even though your shop is open.',newbert:'GitHub API returns rate limit exceeded when fetching repositories.',detect:'Provider status/latency and structured 429 / 5xx metrics.',handle:'Timeout + capped retry for safe work, cache/fallback, degrade gracefully.'},
+{icon:'📥',name:'Input validation errors',time:'17:24',lesson:'The first line of defense: format, range/length, and required-field validation, typically HTTP 400.',analogy:'A form asks for a 10-digit phone number; you submitted only 3 digits.',newbert:'An internship form receives an impossible graduation year.',detect:'Schema validation at the API boundary.',handle:'Return safe actionable 400 field errors. Do not retry invalid input.'},
+{icon:'⚙️',name:'Configuration errors',time:'20:10',lesson:'Development has an API key; production lacks it. The speaker prefers startup failure to late runtime 500 errors.',analogy:'A train should not depart if it has no brake system.',newbert:'Render deploy lacks GITHUB_TOKEN or DATABASE_URL.',detect:'Validate required environment variables at boot/readiness.',handle:'Fail safe early, fix deployment settings; never reveal secret values.'}
+];
+let faultIndex=0;
+function renderFaults(){ $('faultCards').innerHTML=faults.map((f,i)=>`<button class="card case-card ${i===faultIndex?'active':''}" data-f="${i}"><div class="case-icon">${f.icon}</div><h3>${f.name}</h3><span class="small">Teacher at ${f.time}</span></button>`).join('');document.querySelectorAll('[data-f]').forEach(b=>b.addEventListener('click',()=>{faultIndex=+b.dataset.f;renderFaults();}));let f=faults[faultIndex];$('faultDetail').innerHTML=`<h3>${f.icon} ${f.name} · <a href="https://youtu.be/8NaM_9aKS24?t=${f.time.replace(':','m')}s" target="_blank">Watch ${f.time} ↗</a></h3><p><b>Teacher's idea:</b> ${f.lesson}</p><div class="grid2"><div class="subcard"><div class="shadow-label">Plain-language analogy</div>${f.analogy}</div><div class="subcard"><div class="shadow-label">Newbert example</div>${f.newbert}</div><div class="subcard"><div class="shadow-label">Detect</div>${f.detect}</div><div class="subcard"><div class="shadow-label">Handle</div>${f.handle}</div></div>`;}
+renderFaults();
+// Retry lab.
+let attempts=0,elapsed=0,done=false;const maxAttempts=5;function retryReset(){attempts=0;elapsed=0;done=false;$('retryState').textContent='Ready';$('retryClock').textContent='Simulated elapsed: 0 s';$('attemptTimeline').innerHTML='<div class="attempt">No attempts yet</div>';$('retryNext').disabled=false;$('retryAdvice').textContent='The backoff is a simulation; no network calls or real delays occur.';}
+function retryNext(){if(done||attempts>=maxAttempts)return;let code=Number($('retryErr').value),transient=[429,503].includes(code),fails=+ $('failN').value,base=+$('baseDelay').value;attempts++;let willFail=attempts<=fails;if(attempts===1)$('attemptTimeline').innerHTML='';let now=0;
+if(attempts>1&&transient){let prevBase=base*Math.pow(2,attempts-2);let jitter=$('useJitter').checked?0.8+Math.random()*0.4:1;now=Math.round(prevBase*jitter);elapsed+=now;const wait=document.createElement('div');wait.className='attempt wait adding';wait.innerHTML=`<b>Wait</b><br>${(now/1000).toFixed(2)} s`; $('attemptTimeline').appendChild(wait);}
+const elem=document.createElement('div');elem.className='attempt adding '+(willFail?'bad':'ok');elem.innerHTML=`<b>Attempt ${attempts}</b><br>${willFail?'HTTP '+code:'HTTP 200 ✓'}`;$('attemptTimeline').appendChild(elem);$('retryClock').textContent='Simulated elapsed: '+(elapsed/1000).toFixed(2)+' s';
+if(!willFail){done=true;$('retryState').textContent='Success after '+attempts+' attempt(s)';$('retryAdvice').textContent='The provider succeeded. Stop retrying immediately.';}
+else if(!transient){done=true;$('retryState').textContent='Do not retry '+code;$('retryAdvice').textContent=code===400?'Malformed input will not fix itself. Fix the payload instead of retrying.':'Invalid credentials require repairing authentication, not blind retries.';}
+else if(attempts>=maxAttempts){done=true;$('retryState').textContent='Retry budget exhausted';$('retryAdvice').textContent='Return a controlled failure, queue safe recovery, or use a fallback. Never retry forever.';}
+else{$('retryState').textContent='Retryable HTTP '+code;$('retryAdvice').textContent='Transient problem. Next attempt waits with exponential backoff'+($('useJitter').checked?' and jitter.':'.');}
+if(done)$('retryNext').disabled=true;$('attemptTimeline').scrollLeft=$('attemptTimeline').scrollWidth;
+}
+$('retryNext').addEventListener('click',retryNext);$('retryReset').addEventListener('click',retryReset);$('failN').addEventListener('input',()=>{$('failLabel').textContent=$('failN').value;retryReset();});['retryErr','baseDelay','useJitter'].forEach(id=>$(id).addEventListener('change',retryReset));
+// Health dashboard.
+function updateHealth(){let proc=$('proc').checked,db=$('db').checked,config=$('config').checked,external=$('external').checked,biz=$('biz').checked;let ready=proc&&db&&config;const set=(id,v,good,text)=>{let e=$(id);e.className='status-pill'+(good?'':' err');e.textContent=text;};set('liveStatus',proc,proc,'/live → '+(proc?'200':'no response'));set('readyStatus',ready,ready,'/ready → '+(ready?'204':'503'));set('businessStatus',biz,biz,'Business: '+(biz?'normal':'degraded'));
+$('dbNode').className='mini-node '+(db?'success':'error');$('serviceNode').className='mini-node '+(proc&&config?'success':'error');$('latency').textContent=db?'120 ms':'5000+ ms';$('latency').className=db?'good':'bad';$('errors').textContent=(proc&&db&&config)?'0.1%':'22%';$('errors').className=ready?'good':'bad';$('bizmetric').textContent=biz?'98% of baseline':'12% of baseline';$('bizmetric').className=biz?'good':'bad';
+let x=!proc?'The process has stopped: /live does not respond.':!config?'The server process is alive, but its required configuration is missing. It should not receive traffic.':!db?'Process alive, DB unavailable. Readiness fails; stop routing DB-dependent requests.':!biz?'Readiness passes, but business outcomes have collapsed. HTTP health checks alone cannot catch this logic problem.':!external?'Core API can serve traffic, but email delivery is degraded. Mark email jobs as pending and recover asynchronously.':'All basic checks pass. Still monitor latency, throughput, error rates and business outcomes.';$('healthExplain').textContent=x;
+}['proc','db','config','external','biz'].forEach(id=>$(id).addEventListener('change',updateHealth));updateHealth();
+// Chapters: complete timed outline.
+const chapters=[
+['00:00','Mindset: errors happen','Database queries fail; external APIs time out; bad input and edge cases are normal. The goal is predict, detect, contain, recover.'],
+['02:00','Logic errors','Wrong requirements, algorithm bugs and ignored edge cases. Double-discount e-commerce example can lose money silently.'],
+['05:24','Database failures','Lost connections, exhausted pool, unique / foreign key constraints, invalid/slow queries and deadlocks.'],
+['10:51','External dependencies','Network issues, expired auth, external rate limits (429), outages, exponential backoff and fallbacks.'],
+['17:24','Input validation','Format, range, required fields, HTTP 400 as first line of defense.'],
+['20:10','Configuration errors','Missing production environment variable; prefer startup validation to later runtime failure.'],
+['24:13','Proactive detection','Health/status endpoints, real database checks, dependency functionality and core configuration checks.'],
+['29:34','Monitoring and observability','Errors, response time, throughput, resources, structured logs, and business success metrics.'],
+['34:12','Graceful handling','Immediate response, retry vs containment, auto/manual/data recovery, controlled propagation, error boundaries.'],
+['42:45','Global error handler walkthrough','Book platform: validation and database errors bubble through route, handler, service and repository; structured safe responses.'],
+['60:09','Security','Do not expose SQL/stack details; use generic login errors to avoid enumeration; keep secrets and sensitive values out of logs.']
+];
+$('chapterList').innerHTML=chapters.map(([time,title,summary],i)=>{let [m,s]=time.split(':').map(Number),t=m*60+s;return `<div class="chap"><a href="https://www.youtube.com/watch?v=8NaM_9aKS24&t=${t}s" target="_blank" rel="noopener">▶ ${time}</a><div><b>${i+1}. ${title}</b><div class="small">${summary}</div></div></div>`;}).join('');
+// Knowledge quiz.
+const questions=[
+['An API returns 200, but applies a discount twice. What kind of failure?',['Network error','Logic error','Configuration error'],1,'Logic bugs can return technically successful HTTP responses but wrong business outcomes.'],
+['When an email provider temporarily returns HTTP 429, what is usually best?',['Unbounded immediate retry','Bounded backoff respecting Retry-After','Reveal API key to client'],1,'Use bounded retries, heed Retry-After and add jitter.'],
+['PostgreSQL unique violation has which SQLSTATE?',['23505','40P01','23503'],0,'23505 indicates unique-constraint violation.'],
+['What belongs in a generic 500 response to the browser?',['Raw SQL query','Database password','Generic message and request ID'],2,'Keep detailed internals in safe logs; give clients a sanitized error.'],
+['Process responds, but DB is down. Which is true?',['Liveness can pass while readiness fails','Readiness must pass','Every request is healthy'],0,'Alive does not imply safe to receive DB-dependent traffic.'],
+['Which failed operation should generally NOT be retried?',['Short transient timeout','Malformed client payload (400)','Retry-safe 503'],1,'Changing nothing about a malformed request cannot fix validation.'],
+['Why is an idempotency key useful?',['Improves password hashing','Avoids duplicate side effects on retried operations','Makes SQL faster'],1,'A stable key helps deduplicate a request whose first outcome was uncertain.'],
+['What is dangerous about returning "email not registered" on login?',['It leaks account existence','It adds latency','It makes HTTP invalid'],0,'The error lets attackers enumerate registered accounts.'],
+['Which signal can find silent business errors?',['Only CPU usage','Number of stack traces only','Drop in successful internship applications'],2,'Business metrics detect failure even if HTTP status remains successful.'],
+['Best place to centralize safe response formatting in Express?',['Each database query repeats it','A final error-handling middleware','React component only'],1,'Use a final middleware to map known errors and sanitize unknown ones.']
+];let chosen={};
+function renderQuiz(){ $('quizList').innerHTML=questions.map((q,i)=>`<div class="q"><div><b>${i+1}. ${q[0]}</b></div>${q[1].map((a,j)=>`<button data-q="${i}" data-a="${j}" class="${chosen[i]===j?(j===q[2]?'correct':'wrong'):''}" ${chosen[i]!==undefined?'disabled':''}>${String.fromCharCode(65+j)}. ${a}</button>`).join('')}${chosen[i]!==undefined?`<div class="${chosen[i]===q[2]?'good':'bad'}"><b>${chosen[i]===q[2]?'Correct':'Not quite'}.</b> ${q[3]}</div>`:''}</div>`).join('');document.querySelectorAll('[data-q]').forEach(b=>b.addEventListener('click',()=>{chosen[+b.dataset.q]=+b.dataset.a;renderQuiz();}));let answered=Object.keys(chosen).length;let correct=Object.entries(chosen).filter(([k,v])=>v===questions[+k][2]).length;$('score').textContent=`Answered ${answered}/10 · Correct ${correct}`;if(answered===questions.length){$('quizFinal').innerHTML=`<b>Quiz completed:</b> ${correct}/10 correct. ${correct>=8?'Strong conceptual result. Now implement one failure path without copying the example.':'Revisit weak topics, repeat the simulator, and try again.'}`;}else $('quizFinal').textContent='Challenge: explain how you would make Newbert handle a temporary GitHub API outage without crashing or leaking credentials.';}
+$('resetQuiz').addEventListener('click',()=>{chosen={};renderQuiz();});renderQuiz();
+})();
+</script>
+</body></html>
